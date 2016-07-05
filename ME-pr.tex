@@ -53,11 +53,11 @@
 	% use a multiple column layout for up to three different
 	% affiliations
 	\author{
-		\IEEEauthorblockN{TIP$^{1}$}
+		\IEEEauthorblockN{kk$^{1}$}
 		\IEEEauthorblockA{
 			$^{1}$ National Laboratory of Pattern Recognition, \\
 			Institute of Automation, Chinese Academy of Sciences, Beijing, China \\
-			Email: \{TIP\}@nlpr.ia.ac.cn \\
+			Email: \{kk\}@nlpr.ia.ac.cn \\
 		}
 	}
 	%\footnote{National Laboratory of Pattern Recognition, Institute of Automation, Chinese Academy of Sciences}
@@ -71,7 +71,9 @@
 	
 	\IEEEpeerreviewmaketitle
 	\section{Introduction}
-	Mathematical Expression (ME) plays a role in scientific area and automatic ME recognition has been studied for a long time. A typical ME recognition system usually contains three parts: mathematical symbol segmentation, mathematical symbol recognition and structural analysis.
+	Mathematical Expression (ME) plays a role in scientific area. Automatic ME recognition has been studied since 1960s and thrived from 1980s to recent years [survey]. A typical ME recognition system usually contains three parts: mathematical symbol (MS) segmentation, mathematical symbol recognition and structural analysis. For previous studies on ME recognition, most of the research focused on scanned document where background contains little noise and this assists MS segmentation to perform well. However, as the popularity of using mobile devices grows, we tend to deal with camera-taken images instead of scanned ones and this brings more challenges for Optical Character Recognition (OCR) area. Segmentation 
+	
+	
 	recognition has been studied for a long time. 
 	Review ME recognition methods and point out the problems ...
 		
@@ -88,34 +90,36 @@
 	% Before giving the network structure, we should give a block diagram of ME image processing, with the CNN as a block in it. Explain every step in the processing flow.
 	% The overview part needs substantial extension. It should give a complete view of the method to the readers.
 	\subsection{Overview}
-	...
-	Our system mainly contains three parts: a spatial transformer network for ME alignment, a fully convolution network for MS detection and recognition and a tree based structural analysis module.
+	\begin{figure*}
+		\centering
+		\includegraphics[scale=0.3]{images/stn-densebox-pipline.eps}
+	\end{figure*}
+	Our system mainly contains three parts as shown in Fig.x. The ME alignment part is designed to adjust the ME in image to be horizontally centered. The following MS Recognition part takes in the adjusted ME and outputs the bounding box and category for each symbol. 
 	\subsection{Automatic alignment}
-	We adopt some ideas in Spatial Transformer Network to perform the ME alignment. In [stn], the network takes the category label, which can be regarded as a $1 \times 1$ matrix, as the supervised information for each image and the transformation parameters are learned in an unsupervised way. While considering that the afterwards fully convolution network for MS detection and recognition takes a $n \times n$ matrix as the supervised message and the label containing spatial information is set on condition that the ME has already been properly aligned, it is essential to learn the transformation in a supervised way and pretrain the alignment network.
+	We borrow some ideas in Spatial Transformer Network to perform the ME alignment. In [stn], the network takes the category label, which can be regarded as a $1 \times 1$ matrix, as the supervised information for each image and the transformation parameters are learned in an unsupervised way. While considering that the afterwards fully convolution network for MS detection and recognition takes a $n \times n$ matrix as the supervised message and the label containing spatial information is set on condition that the ME has already been properly aligned, it is essential to learn the transformation in a supervised way and pretrain the alignment network.
 	
-	The STN uses a $3 \times 2$ transformation matrix to represent translation, rotation, scale and shear. One natural way to directly learn the $3 \times 2$ matrix, and if we only consider translation and rotation, the transformation matrix $T$ can be represented as 
+	The STN uses a $2 \times 3$ transformation matrix to represent translation, rotation, scale and shear. One natural way to directly learn the $2 \times 3$ matrix, and if we only consider translation and rotation, the transformation matrix $T$ can be represented as 
 	\begin{equation}
 		T = 
 		\begin{bmatrix}
-		\cos\theta & \sin\theta\\ 
-		-\sin\theta & \cos\theta\\
-		x & y
+		\cos\theta & -\sin\theta & x\\ 
+		\sin\theta & \cos\theta & y
 		\end{bmatrix}
 	\end{equation}
 	However, there are two problems need to be dealt with. The first one is that dimensions of $x, y, \sin(\theta), \cos(\theta)$ are not unified and the loss may be small enough for translation parameters but far from ideal for rotation ones. The second problem is that the network is required to regress complicated nonlinear functions like $\sin, \cos$ or compound ones, and it is not an easy task. Consequently, we split $T$ into three matrices $T_1, T_2, T_3$ each of which represents translation, rotation and scale, respectively.
 	\begin{equation}
 		T_1 = 
 		\begin{bmatrix}
-		1 & 0 & 0\\
-		0 & 1 & 0\\
-		x & y & 1
+		1 & 0 & x\\
+		0 & 1 & y\\
+		0 & 0 & 1
 		\end{bmatrix}
 	\end{equation}
 	\begin{equation}
 		T_2 = 
 		\begin{bmatrix}
-		\cos\theta & \sin\theta & 0\\
-		-\sin\theta & \cos\theta & 0\\
+		\cos\theta & -\sin\theta & 0\\
+		\sin\theta & \cos\theta & 0\\
 		0 & 0 & 1
 		\end{bmatrix}
 	\end{equation}
@@ -127,14 +131,40 @@
 	0 & 0 & 1
 	\end{bmatrix}
 	\end{equation}
-	During the training stage, we first unify the dimension of $x, y, \theta, s$ and regress the unified transformation parameters by a multi-task structure shown in Fig.[Alignment Network]. And during the test stage, we first integrate $T_1, T_2, T_3$ into $T$ by
+%	\begin{equation}
+%	T_1 = 
+%	\begin{bmatrix}
+%	1 & 0 & 0\\
+%	0 & 1 & 0\\
+%	x & y & 1
+%	\end{bmatrix}
+%	\end{equation}
+%	\begin{equation}
+%	T_2 = 
+%	\begin{bmatrix}
+%	\cos\theta & \sin\theta & 0\\
+%	-\sin\theta & \cos\theta & 0\\
+%	0 & 0 & 1
+%	\end{bmatrix}
+%	\end{equation}
+%	\begin{equation}
+%	T_3 = 
+%	\begin{bmatrix}
+%	s & 0 & 0\\
+%	0 & s & 0\\
+%	0 & 0 & 1
+%	\end{bmatrix}
+%	\end{equation}
+	In the training stage, we first unify the mean value and variation of ground truth $x, y, \theta, s$ into $x', y', \theta', s'$ and regress $x', y', \theta', s'$ by a multi-task structure shown in Fig.[Alignment Network]. And in the test stage, we first convert unified transformation parameters back to their own statistic and then integrate $T_1, T_2, T_3$ into $T$ by
 	\begin{equation}
-		T = T_2 \cdot T_3 \cdot T_1
+		T = T_1 \cdot T_2 \cdot T_3
 	\end{equation}
-	and then remove the last column of $T$. The rest operation is the same as $Grid Generator$ and $Sampler$ in [stn].
+	and finally remove the last row of $T$ to get the $2 \times 3$ transformation matrix for $Grid Generator$ and $Sampler$ introduced in [stn].
 		
 	\subsection{Mathematical symbol detection and recognition}	
-    ...
+    We adopt the method for MS detection and recognition in [context-aware-ME]. Compared with [context-aware-ME], we consider more complicated MSs including square root.
+    Before training the network, we pre-process the label of square root. 
+    The bounding box of a square root is shown in Fig.[sqrt]
 	\subsection{Joint training}
 	Differentiable of alignment network
 	\subsection{Structural analysis}
@@ -147,7 +177,9 @@
 	...
 	\subsubsection{Infty}
 	...
-	\subsubsection{Self-based databases}
+	\subsubsection{Real-life Images}
+	...
+	\subsection{Compared with skew correction}
 	...
 	\subsection{Effectiveness of split transformation matrix}
 	...
