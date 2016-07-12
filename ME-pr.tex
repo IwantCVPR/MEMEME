@@ -12,6 +12,7 @@
 
 % *** GRAPHICS RELATED PACKAGES ***
 %
+%\usepackage{euler}
 \usepackage{subfigure} % add by kk
 \usepackage{float} % add by kk
 \usepackage{CJK} % add by kk
@@ -48,7 +49,7 @@
 
 
 \begin{document}
-	\title{Automatic Mathematical Expression Alignment and Recognition System}
+	\title{Automatic Mathematical Expression Skew Correction and Recognition System}
 	% author names and affiliations
 	% use a multiple column layout for up to three different
 	% affiliations
@@ -71,31 +72,60 @@
 	
 	\IEEEpeerreviewmaketitle
 	\section{Introduction}
-	Mathematical Expression (ME) plays a role in scientific area. Automatic ME recognition has been studied since 1960s and thrived from 1980s to recent years [survey]. A typical ME recognition system usually contains three parts: mathematical symbol (MS) segmentation, mathematical symbol recognition and structural analysis. For previous studies on ME recognition, most of the research focused on scanned document where background contains little noise and this assists MS segmentation to perform well. However, as the popularity of using mobile devices grows, we tend to deal with camera-taken images instead of scanned ones and this brings more challenges for Optical Character Recognition (OCR) area. Segmentation 
+	Mathematical Expression (ME) plays a role in scientific research area. Automatic ME recognition has been studied since 1960s and thrived from 1980s to recent years [survey]. For most previous studies on ME recognition, people focused on scanned documents where background contains little noise and this assists MS segmentation and recognition to perform well. Nevertheless, as the popularity of mobile devices grows, we tend to deal with camera-taken images instead of scanned ones and considering these images are taken under complicated circumstances, previous methods in a ME recognition system may face new challenges as shown in Fig.[Segmentation Challenges]
 	
+	A typical ME recognition system contains three stages: mathematical symbol segmentation, segmented symbol recognition and structural analysis. The first two steps are designed to output the location, size and identity for each symbol and the last structural analysis step tries to combine the information of isolated symbols and gives out a structural relationship between them. Research on structural analysis only is based on the assumption that all symbols have been located and recognized correctly. Methods on structural analysis concentrate more on efficiency rather than correctness since [Syntax-directed recognition of hand-printed two-dimensional mathematics], so we lay less emphasis on structural analysis in the following part.
 	
-	recognition has been studied for a long time. 
-	Review ME recognition methods and point out the problems ...
-		
-	Review CNN ...
-		
-	In this paper, our contribution mainly falls into two aspects: 1.Proposed an automatic alignment and recognition system; 2. Build a new benchmark composed of distorted ME images.
-		
-	The remainder of this paper begins with ... We then ... We then report the results ...
-		
+	Mathematical symbol segmentation mainly deals with four kinds of challenges. The first one is some symbols like `$i$', `$j$' and `$=$' consist of multiple components, and therefore we have to combine the corresponding components. The second one is that we should cut some torching symbols when they are connected with each other as shown in Fig.[Challenges of Traditional Methods]. The third one is that it should be careful to deal with symbols like `$\sqrt{\quad}$', fraction line and `$\int$' whose bounding boxes may contain other symbols, because some kinds of segmentation methods are based on projection profile cutting [survey-18, 51, 52, 22] instead of connected component extraction. The last one is most segmentation methods rely on the use of thresholds which hinder the robustness on all possible cases. 
+	
+	Segmented symbol recognition methods mainly fall into two groups. The first group of methods regards segmented symbols as isolated components and ignores their structural relationships. Typical methods in this group are template matching, statistical approaches and neural networks. All these methods entail a post-processing for disambiguating. The second kind of methods for symbol recognition is structural approach considering structural relationships between symbols, however, these methods either focus on on-line handwritten MEs or ensure the identity of ambiguous symbols in structural analysis stage [SCFG].
+	
+	Another vital point which is prone to be neglected is that all these ME recognition systems are supposed to handle horizontal MEs, while for images taken by mobile devices, MEs may be inclined if we take photos from an improper perspective. Thus, it is also essential to perform ME skew correction before the following steps. However, related works [...] on skew correction are based on xxx methods. % --- <read papers on skew detection and correction>
+	
+	In current years, related works on Convolution Neural Network (CNN) have gotten great achievements in computer vision area such as classification [AlexNet], detection [RCNN, Fast RCNN, YOLO, SSD] and segmentation [FCN]. What all these works in common is they try to make model learn to solve problems itself depending on raw data instead of manually extracted features which rely more on human-made thresholds. In ME recognition problem, since we have to deal with skew correction, unstable threshold-depended segmentation, multi-parts symbol combination, torching symbols cutting and error correction in structural analysis process, it may be more proper and robust to train a model learning to solve those problems from raw data.
+	
+	In this study our contributions can be divided into two parts: 1. We propose a ME skew correction and recognition system which takes in ME images and outputs corresponded \LaTeX strings. Both skew correction and recognition are based on convolutional neural networks and trained purely by synthetic data; 2. To test our method, we also build a new database which contains ME images taken under various viewpoints, illumination and other complicate conditions. The result xxxx
+	
+	The rest of this paper is organized as follows: Section 2 reviews related works, Section 3 gives an overview of our ME recognition system, Section 4 illustrates skew correction method based on spatial transformer network, Section 5 describes mathematical symbol localization and recognition method based on fully convolution network, Section 6 presents the structural analysis method based on tree transformation, Section 7 introduces the proposed test set and displays the experimental results, and Section 8 draws conclusion remarks.
+	
+	% In this study, we propose a novel ME recognition system combining both ME alignment, recognition and structural analysis. Unlike traditional methods, our system performs ME skew correction and recognition based on a convolutional neural network, and therefore, both skew correction and recognition are learned among abundant training data. With less thresholds are relied and much more training data, our system performs well on both scanned ME images and camera taken ones. % should be refined
+	
+	\begin{figure}
+		\centering
+		\subfigure[]{
+			\label{Fig.sub.1}
+			\includegraphics[scale=0.4]{images/complicate-background.eps}} % complicate background
+		\subfigure[]{
+			\label{Fig.sub.2}
+			\includegraphics[scale=0.4]{images/rotation.eps}} % rotation and shear
+		\subfigure[]{
+			\label{Fig.sub.3}
+			\includegraphics[scale=0.4]{images/low-resolution.eps}} % low resolution
+		\subfigure[]{
+			\label{Fig.sub.4}
+			\includegraphics[scale=0.4]{images/uneven-illumination.eps}} % uneven illumination
+		\caption{ME images taken by mobile phones. (a) Complicate background. (b) Inclined expression. (c) Low resolution. (d) Uneven illumination.}
+	\end{figure}
+	
 	\section{Related Work}
-	...
+	In the context of ME recognition, many works have been contributed to the related issues of symbol segmentation, symbol recognition and structural analysis.
 	
-	\section{Proposed Method}
+	For symbol segmentation, ... % projection profile cutting
+	For symbol recognition, ...
+	For structural analysis, ... 
+	
+	As to the skew correction, previous works prefer to deal with scanned document instead of MEs. 
+	
+	\section{System Overview}
 	% Before giving the network structure, we should give a block diagram of ME image processing, with the CNN as a block in it. Explain every step in the processing flow.
 	% The overview part needs substantial extension. It should give a complete view of the method to the readers.
-	\subsection{Overview}
 	\begin{figure*}
 		\centering
 		\includegraphics[scale=0.3]{images/stn-densebox-pipline.eps}
+		\caption[overview]{The pipeline of our skew correction and mathematical expression recognition system}
 	\end{figure*}
 	Our system mainly contains three parts as shown in Fig.x. The ME alignment part is designed to adjust the ME in image to be horizontally centered. The following MS Recognition part takes in the adjusted ME and outputs the bounding box and category for each symbol. 
-	\subsection{Automatic alignment}
+	\section{Mathematical Expression Skew Correction}
 	We borrow some ideas in Spatial Transformer Network to perform the ME alignment. In [stn], the network takes the category label, which can be regarded as a $1 \times 1$ matrix, as the supervised information for each image and the transformation parameters are learned in an unsupervised way. While considering that the afterwards fully convolution network for MS detection and recognition takes a $n \times n$ matrix as the supervised message and the label containing spatial information is set on condition that the ME has already been properly aligned, it is essential to learn the transformation in a supervised way and pretrain the alignment network.
 	
 	The STN uses a $2 \times 3$ transformation matrix to represent translation, rotation, scale and shear. One natural way to directly learn the $2 \times 3$ matrix, and if we only consider translation and rotation, the transformation matrix $T$ can be represented as 
@@ -131,43 +161,26 @@
 	0 & 0 & 1
 	\end{bmatrix}
 	\end{equation}
-%	\begin{equation}
-%	T_1 = 
-%	\begin{bmatrix}
-%	1 & 0 & 0\\
-%	0 & 1 & 0\\
-%	x & y & 1
-%	\end{bmatrix}
-%	\end{equation}
-%	\begin{equation}
-%	T_2 = 
-%	\begin{bmatrix}
-%	\cos\theta & \sin\theta & 0\\
-%	-\sin\theta & \cos\theta & 0\\
-%	0 & 0 & 1
-%	\end{bmatrix}
-%	\end{equation}
-%	\begin{equation}
-%	T_3 = 
-%	\begin{bmatrix}
-%	s & 0 & 0\\
-%	0 & s & 0\\
-%	0 & 0 & 1
-%	\end{bmatrix}
-%	\end{equation}
 	In the training stage, we first unify the mean value and variation of ground truth $x, y, \theta, s$ into $x', y', \theta', s'$ and regress $x', y', \theta', s'$ by a multi-task structure shown in Fig.[Alignment Network]. And in the test stage, we first convert unified transformation parameters back to their own statistic and then integrate $T_1, T_2, T_3$ into $T$ by
 	\begin{equation}
 		T = T_1 \cdot T_2 \cdot T_3
 	\end{equation}
 	and finally remove the last row of $T$ to get the $2 \times 3$ transformation matrix for $Grid Generator$ and $Sampler$ introduced in [stn].
 		
-	\subsection{Mathematical symbol detection and recognition}	
-    We adopt the method for MS detection and recognition in [context-aware-ME]. Compared with [context-aware-ME], we consider more complicated MSs including square root.
+	\section{Mathematical Symbol Localization and Recognition}
+    We adopt the method for MS detection and recognition in [context-aware-ME] as shown in Fig.[overview]. The only difference from [context-aware-ME] is we consider much more kinds of symbols listed in Table.[All symbols]. What should be mentioned is the label design for square root. The square root symbol is special for its bounding box contains other symbols, so it is not safe to simply set the detection label map as other symbols'. 
+    
+    
+    
+    Compared with [context-aware-ME], we consider more complicated MSs including square root.
     Before training the network, we pre-process the label of square root. 
     The bounding box of a square root is shown in Fig.[sqrt]
+    
+    
+    
 	\subsection{Joint training}
 	Differentiable of alignment network
-	\subsection{Structural analysis}
+	\section{Tree Transformation Based Structural Analysis}
 	...
 	\section{Experiments}
 	...
@@ -179,6 +192,9 @@
 	...
 	\subsubsection{Real-life Images}
 	...
+	\subsection{Evaluation Method}
+	The evaluation of ME recognition systems can be divided into two groups: symbol level and expression level. The symbol level evaluation is for individual symbols regardless of the structural information such as scope, subscript/superscript or level. While the expression level evaluation takes structural relationship into consideration which usually measures the metrics between recognized expression string (such as \LaTeX or MathML form) and ground truth string [EMERS]. However, for off-line printed mathematical expressions, once bounding boxes and identities of symbols in an expression are all corrected determined, the structural relationship can be given without an error [The early structural analysis paper in Survey] and that is why most structural analysis methods focus on handwritten MEs. % This should be illustrated earlier 
+	Since we study on off-line printed ME in this paper, we evaluate our method the same as that in PASCAL VOC detection task, but with more strict requirements.
 	\subsection{Compared with skew correction}
 	...
 	\subsection{Effectiveness of split transformation matrix}
