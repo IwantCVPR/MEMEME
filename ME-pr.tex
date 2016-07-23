@@ -132,50 +132,56 @@
 	\begin{equation}
 		T = 
 		\begin{bmatrix}
-		\cos\theta & -\sin\theta & x\\ 
-		\sin\theta & \cos\theta & y
+			\cos\theta & -\sin\theta & x\\ 
+			\sin\theta & \cos\theta & y
 		\end{bmatrix}
 	\end{equation}
 	However, there are two problems need to be dealt with. The first one is that dimensions of $x, y, \sin(\theta), \cos(\theta)$ are not unified and the loss may be small enough for translation parameters but far from ideal for rotation ones. The second problem is that the network is required to regress complicated nonlinear functions like $\sin, \cos$ or compound ones, and it is not an easy task. Consequently, we split $T$ into three matrices $T_1, T_2, T_3$ each of which represents translation, rotation and scale, respectively.
 	\begin{equation}
 		T_1 = 
 		\begin{bmatrix}
-		1 & 0 & x\\
-		0 & 1 & y\\
-		0 & 0 & 1
+			1 & 0 & x\\
+			0 & 1 & y\\
+			0 & 0 & 1
 		\end{bmatrix}
 	\end{equation}
 	\begin{equation}
 		T_2 = 
 		\begin{bmatrix}
-		\cos\theta & -\sin\theta & 0\\
-		\sin\theta & \cos\theta & 0\\
-		0 & 0 & 1
+			\cos\theta & -\sin\theta & 0\\
+			\sin\theta & \cos\theta & 0\\
+			0 & 0 & 1
 		\end{bmatrix}
 	\end{equation}
 	\begin{equation}
-	T_3 = 
-	\begin{bmatrix}
-	s & 0 & 0\\
-	0 & s & 0\\
-	0 & 0 & 1
-	\end{bmatrix}
+		T_3 = 
+		\begin{bmatrix}
+			s & 0 & 0\\
+			0 & s & 0\\
+			0 & 0 & 1
+		\end{bmatrix}
 	\end{equation}
 	In the training stage, we first unify the mean value and variation of ground truth $x, y, \theta, s$ into $x', y', \theta', s'$ and regress $x', y', \theta', s'$ by a multi-task structure shown in Fig.[Alignment Network]. And in the test stage, we first convert unified transformation parameters back to their own statistic and then integrate $T_1, T_2, T_3$ into $T$ by
 	\begin{equation}
 		T = T_1 \cdot T_2 \cdot T_3
 	\end{equation}
 	and finally remove the last row of $T$ to get the $2 \times 3$ transformation matrix for $Grid Generator$ and $Sampler$ introduced in [stn].
-		
+	
 	\section{Mathematical Symbol Localization and Recognition}
-    We adopt the method for MS detection and recognition in [context-aware-ME] as shown in Fig.[overview]. The only difference from [context-aware-ME] is we consider much more kinds of symbols listed in Table.[All symbols]. What should be mentioned is the label design for square root. The square root symbol is special for its bounding box contains other symbols, so it is not safe to simply set the detection label map as other symbols'. 
-    
-    
-    
-    Compared with [context-aware-ME], we consider more complicated MSs including square root.
-    Before training the network, we pre-process the label of square root. 
-    The bounding box of a square root is shown in Fig.[sqrt]
-    
+	Once we adjust the ME images to the appropriate viewpoint, the next task is to localize and recognize symbols in images. To illustrate the mathematical symbol localization and recognition stage, we divide it into three part: Training sample generation, Multi-task training-fusing and Joint training.
+	\subsection{Training sample generation}
+	Given a ME image and bounding boxes for each symbol in it, we first choose one of symbols in it and then crop an image patch with the chosen symbol centred. Then we normalize the chosen symbol by resize its diagnose line length.
+	\subsection{Multi-task training}
+	\subsection{Joint training}
+	We adopt the method for MS detection and recognition in [context-aware-ME] as shown in Fig.[overview]. For each training sample, we first select one of symbols in it and then crop an image patch centred by the selected symbol. The cropped patch is for training and 
+	The only difference from [context-aware-ME] is we consider much more kinds of symbols listed in Table.[All symbols]. What should be mentioned is the label design for square root. The square root symbol is special for its bounding box contains other symbols, so it is not safe to simply set the detection label map as other symbols'. 
+	
+	
+	
+	Compared with [context-aware-ME], we consider more complicated MSs including square root.
+	Before training the network, we pre-process the label of square root. 
+	The bounding box of a square root is shown in Fig.[sqrt]
+	
 	\subsection{Joint training}
 	Differentiable of alignment network
 	\section{Tree Transformation Based Structural Analysis}
@@ -200,8 +206,8 @@
 	\subsection{Effectiveness of joint-training}
 	No joint-training
 	Joint-training:
-		1. Continue supervising transformation
-		2. Training transformation in unsupervised way
+	1. Continue supervising transformation
+	2. Training transformation in unsupervised way
 	
 	
 	
@@ -211,5 +217,4 @@
 	%\bibliographystyle{IEEEtran}
 	%\bibliography{ref}
 \end{document}
-
 
