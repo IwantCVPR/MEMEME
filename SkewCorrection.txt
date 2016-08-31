@@ -1,1 +1,10 @@
-Previous works on skew correction also mainly deal with scanned documents and methods in these research  
+Related work: 
+For skew correction, most previous works [][][] dealt with scanned documents. Methods in these works tried to get the ... 
+
+Image geometry correction ... https://en.wikipedia.org/wiki/Image_geometry_correction, http://ieeexplore.ieee.org/document/754589/?arnumber=754589&tag=1, Correction of projective distortion in long-image-sequence mosaics without prior information
+Perspective-estimation-for-document-images
+Skew and Slant Correction for Document Images Using Gradient Direction --- check papers refer to it !
+Camera-based analysis of text and documents: a survey
+
+
+While for images taken by cameras, we should consider the projective transformation if we intend to perform image correction. 
